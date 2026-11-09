@@ -2,6 +2,8 @@
 
 ## User-administration continuation
 
+- Follow-up native export completed successfully: Android and iOS JavaScript bundles ~4.7 MB each, including username login, temporary-password change gate and membership restrictions. Metro took ~848 seconds on this host. These are unsigned JS exports, not installed/device-tested applications. Configured-value artifact scan passed across 55 web/native files against 3 configured private values; not a comprehensive security audit.
+
 - Migration 0008 applied locally and to Neon production/preview. It preserves existing passwords and email login; no real production account was created or reset by this migration.
 - Added guarded platform-admin APIs for atomic account/organization/membership creation, membership role/restriction edits, account state, password reset, username-or-email login and self-password change. Uses maintained Better Auth hashing, reason/version checks, audit without passwords, explicit role/organization compatibility and transaction-serialized administrator rechecks.
 - Temporary credentials cannot access business APIs until privately changed; self-change, reset and disable revoke web/native sessions. Membership permissions are reread by the API and checked before command replay. Web/native session polling clears protected caches when access changes.

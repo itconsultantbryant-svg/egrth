@@ -8,7 +8,8 @@ This file tracks **implemented and observed**, not intended completion. No relea
 - [x] Forced private password change, guarded membership edits, account disable/enable, administrator reset, audited changes and web/native session revocation.
 - [x] Expanded API/security suite: 68 tests / 5 files passed, including seven isolated account/role/credential lifecycle tests. Both client typechecks and API/web build passed.
 - [x] New administrator browser lifecycle acceptance passed: account creation → username login → required private password → live permission removal → account disable/sign-in redirect. Runs with real API and disposable PostgreSQL; not production fake-user seeding.
-- [ ] Native export/device acceptance and full hosted administrator workflow tracked separately. Hosted username/email form, health and anonymous admin-route denial smoke checks pass; cold-start/performance guarantees are not established.
+- [x] Updated Android/iOS JS exports passed after username/password/permission changes; configured-value artifact scan passed across 55 web/native files.
+- [ ] Native signed/device acceptance and full hosted administrator workflow remain separate gates. Hosted username/email form, health and anonymous admin-route denial smoke checks pass; cold-start/performance guarantees are not established.
 - [ ] Invitations/email verification/reset delivery, administrator MFA verification/enforcement and detailed device-session inventory remain unreleased.
 
 ## Public website revision
