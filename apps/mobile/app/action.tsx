@@ -1,0 +1,23 @@
+import { useState } from 'react';
+import { KeyboardAvoidingView, Platform, Text, TextInput, Switch, View, Alert } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
+import * as Crypto from 'expo-crypto';
+import { collectionInput, receivingInput } from '@ecogrowth/contracts';
+import type { Action } from '@ecogrowth/domain/workflows';
+import { useWorkspace } from '../src/context';
+import { request, queryClient, RequestError } from '../src/client';
+import { enqueue } from '../src/offline';
+import { Screen, Card, Button, styles } from '../src/ui';
+export default function ActionScreen(){
+ const {definition}=useLocalSearchParams<{definition:string}>();const w=useWorkspace();let action:Action;try{action=JSON.parse(definition);}catch{return <Text>Invalid action link. Open the workflow from an authorized record.</Text>;}
+ return <ActionForm action={action}/>;
+}
+function ActionForm({action}:{action:Action}){
+ const w=useWorkspace();const [error,setError]=useState(''),[key]=useState(()=>Crypto.randomUUID());
+ const {control,handleSubmit,formState:{isSubmitting}}=useForm({defaultValues:Object.fromEntries(action.fields.map(f=>[f.key,f.value??(f.type==='checkbox'?false:'')]))});
+ function normalize(values:Record<string,any>){const d={...action.initial,...values};for(const f of action.fields){if(f.type==='number')d[f.key]=Number(d[f.key]);if(f.type==='days')d[f.key]=String(d[f.key]).split(',').map(Number);if(f.type==='datetime-local')d[f.key]=new Date(d[f.key]).toISOString();}if(action.name==='dispatch'){d.allocations=[{collectionId:d._collectionId,grams:d._grams}];delete d._collectionId;delete d._grams;}if(action.name==='collect')collectionInput.parse(d);if(action.name==='receive')receivingInput.parse(d);return d;}
+ const scope={userId:w.session?.user.id||'',membershipId:w.membership?.id||''};
+ async function send(values:Record<string,any>,draft=false){setError('');try{if(!w.membership)throw new Error('Choose a membership first.');const data=normalize(values);if(draft){await enqueue(scope,action.name,data,true,key);Alert.alert('Draft saved','Device-local only. This is not a server-confirmed collection.');router.back();return;}try{await request('/commands/'+action.name,w.membership.id,data,key);await queryClient.invalidateQueries();router.back();}catch(e){if(action.name==='collect'&&!(e instanceof RequestError)){await enqueue(scope,action.name,data,false,key);Alert.alert('Queued, not confirmed','Connection failed. Open Sync Queue to retry. The server will recheck assignment and version.');router.back();return;}throw e;}}catch(e){setError((e as Error).message);}}
+ return <KeyboardAvoidingView style={styles.page} behavior={Platform.OS==='ios'?'padding':undefined}><Screen><Text style={styles.eyebrow}>AUTHORIZED WORKFLOW</Text><Text style={styles.heading}>{action.title}</Text><Text style={styles.text}>{action.note||'Saved changes are validated by the shared API and audited.'}</Text>{error?<Text accessibilityRole="alert" accessibilityLiveRegion="assertive" style={styles.error}>{error}</Text>:null}<Card>{action.fields.map(f=><View key={f.key} style={{marginBottom:12}}><Text style={styles.label}>{f.label}</Text><Controller control={control} name={f.key} rules={{required:f.type!=='checkbox'&&f.required}} render={({field,fieldState})=><>{f.type==='checkbox'?<Switch accessibilityLabel={f.label} value={Boolean(field.value)} onValueChange={field.onChange} trackColor={{true:'#166534'}}/>:f.options?<View style={{gap:8}}>{f.options.map(option=><Button key={option} title={`${field.value===option?'Selected: ':''}${option.replaceAll('_',' ')}`} secondary={field.value!==option} onPress={()=>field.onChange(option)}/>)}</View>:<TextInput accessibilityLabel={f.label} style={[styles.input,f.type==='textarea'?{minHeight:100,textAlignVertical:'top'}:{}]} value={String(field.value)} onChangeText={field.onChange} keyboardType={f.type==='number'?'numeric':'default'} multiline={f.type==='textarea'} autoCapitalize="none" placeholder={f.type==='date'?'YYYY-MM-DD':f.type==='datetime-local'?'YYYY-MM-DDTHH:mm':f.type==='days'?'e.g. 1,4':undefined}/ >}{fieldState.error?<Text accessibilityRole="alert" style={styles.error}>This field is required.</Text>:null}</>}/></View>)}<Button title={isSubmitting?'Saving…':'Confirm & save to server'} disabled={isSubmitting} onPress={handleSubmit(values=>send(values))}/>{action.name==='collect'?<Button title="Save device-local draft (not confirmed)" secondary disabled={isSubmitting} onPress={handleSubmit(values=>send(values,true))}/>:null}<Button title="Cancel" secondary onPress={()=>router.back()}/></Card></Screen></KeyboardAvoidingView>;
+}

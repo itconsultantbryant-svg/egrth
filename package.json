@@ -1,0 +1,40 @@
+{
+  "name": "ecogrowth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": "24.x"
+  },
+  "packageManager": "pnpm@11.3.0",
+  "scripts": {
+    "dev": "pnpm --filter @ecogrowth/web dev",
+    "dev:api": "tsx watch apps/api/src/dev.ts",
+    "build": "node scripts/build-api.mjs && pnpm --filter @ecogrowth/web build",
+    "typecheck": "tsc --noEmit && pnpm --filter @ecogrowth/mobile typecheck",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "db:migrate": "tsx packages/db/src/migrate.ts",
+    "db:seed": "tsx packages/db/src/seed.ts"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "latest",
+    "@ecogrowth/contracts": "*",
+    "@ecogrowth/db": "*",
+    "@ecogrowth/domain": "*",
+    "@playwright/test": "latest",
+    "@types/node": "latest",
+    "@types/pg": "latest",
+    "@types/react": "~19.3.0",
+    "@types/react-dom": "latest",
+    "dotenv": "latest",
+    "esbuild": "^0.28.2",
+    "tsx": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}

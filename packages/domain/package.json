@@ -1,0 +1,1 @@
+{"name":"@ecogrowth/domain","version":"0.1.0","private":true,"type":"module","exports":{".":"./src/index.ts","./workflows":"./src/workflows.ts","./navigation":"./src/navigation.ts"},"dependencies":{"@ecogrowth/contracts":"*"}}

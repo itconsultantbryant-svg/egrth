@@ -1,0 +1,1 @@
+{"name":"@ecogrowth/db","version":"0.1.0","private":true,"type":"module","exports":"./src/index.ts","dependencies":{"drizzle-orm":"latest","pg":"latest","dotenv":"latest"}}

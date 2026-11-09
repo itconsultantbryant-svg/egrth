@@ -1,0 +1,2 @@
+export const colors = { primary: '#166534', hover: '#14532D', emerald: '#059669', pale: '#ECFDF5', background: '#F8FAFC', surface: '#FFFFFF', text: '#0F172A', secondary: '#475569', border: '#E2E8F0', warning: '#B45309', danger: '#B91C1C', info: '#1D4ED8' } as const;
+export const pilot = { country: 'LR', name: 'Liberia', timezone: 'Africa/Monrovia', currencies: ['USD', 'LRD'], language: 'en', serviceArea: 'Sinkor pilot cluster' } as const;

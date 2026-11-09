@@ -1,0 +1,25 @@
+CREATE TABLE api_rate_limits(key text NOT NULL, window_start timestamptz NOT NULL, count integer NOT NULL CHECK(count>0), PRIMARY KEY(key,window_start));
+CREATE INDEX native_user_idx ON native_credentials(user_id,session_id);
+CREATE INDEX native_family_idx ON native_credentials(family_id);
+CREATE INDEX facility_org_idx ON facilities(organization_id);
+CREATE INDEX assessments_site_idx ON assessments(site_id);
+CREATE INDEX baseline_site_idx ON baseline_records(site_id);
+CREATE INDEX quotations_site_idx ON quotations(site_id);
+CREATE INDEX agreements_quote_idx ON agreements(quotation_id);
+CREATE INDEX training_site_idx ON training_records(site_id);
+CREATE INDEX subscription_site_idx ON subscriptions(site_id);
+CREATE INDEX schedules_site_idx ON schedule_rules(site_id,subscription_id);
+CREATE INDEX jobs_site_idx ON job_occurrences(site_id);
+CREATE INDEX jobs_route_date_idx ON job_occurrences(route_id,occurrence_date);
+CREATE INDEX collections_collector_idx ON collections(collector_id,created_at);
+CREATE INDEX manifest_partner_idx ON manifests(partner_organization_id,created_at);
+CREATE INDEX manifest_facility_idx ON manifests(facility_id,created_at);
+CREATE INDEX receiving_source_idx ON receiving_allocations(collection_id);
+CREATE INDEX residual_org_idx ON residuals(organization_id,status,created_at);
+CREATE INDEX batch_facility_idx ON batches(facility_id);
+CREATE INDEX batch_source_idx ON batch_allocations(receiving_allocation_id);
+CREATE INDEX complaints_org_idx ON complaints(organization_id,status,created_at);
+CREATE INDEX attachments_org_idx ON attachments(organization_id,created_at);
+CREATE INDEX payment_org_idx ON payments(organization_id,created_at);
+CREATE INDEX notification_org_idx ON notifications(organization_id,user_id,created_at);
+-- The app role should not own tables; runtime grants are applied by the deployment owner, not guessed here.

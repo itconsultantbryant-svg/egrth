@@ -1,0 +1,53 @@
+name: Verify isolated pilot
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecogrowth_test
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ecogrowth_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/ecogrowth_test
+      MIGRATION_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:55432/ecogrowth_test
+      BETTER_AUTH_SECRET: ci-only-isolated-demo-auth-secret-not-production-2026
+      BETTER_AUTH_URL: http://localhost:3001
+      ALLOWED_ORIGINS: http://localhost:5173
+      DEMO_MODE: "true"
+      DEMO_SEED_PASSWORD: CI-demo-only-not-a-production-password-2026!
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.3.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm --filter @ecogrowth/mobile exec expo install --check
+      - run: pnpm --filter @ecogrowth/mobile exec expo export --platform android --platform ios --no-bytecode --max-workers 2
+      - run: node tests/check-client-secrets.mjs apps/web/dist apps/mobile/dist
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-results
+          path: test-results/
+          retention-days: 14
