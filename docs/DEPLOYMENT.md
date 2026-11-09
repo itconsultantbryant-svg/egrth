@@ -35,7 +35,9 @@ Foreground authorized reads refresh at five-second intervals across the query cl
 
 ## Launch blockers
 
-Production administrator email/name has not been nominated. No demo login works against the clean production database. A real membership must be provisioned deliberately; do not infer administrator identity from Git/Neon/Vercel account emails. Invitation/reset delivery, enforced administrator MFA, commercial approvals, private evidence review, remaining financial/correction workflows and device acceptance are still blockers (`LIMITATIONS.md`).
+The owner nominated Samson Bryant (`admin@ecogrowthlib.com`); the first production PLATFORM_ADMIN membership has now been created and audited under the non-demo EcoGrowth platform organization. Hosted password login, session scope and authorized dashboard checks passed; the verification session was signed out. No demo login was copied. The password is not stored in project files. Email ownership was not independently verified, and enforced administrator MFA, invitation/reset delivery, commercial approvals, private evidence review, remaining financial/correction workflows and device acceptance remain blockers (`LIMITATIONS.md`). Change the password shared in conversation before onboarding customers; do not assume reset email is configured.
+
+`scripts/bootstrap-admin.ts` accepts the first administrator's credentials through stdin and refuses to overwrite an existing administrator or promote an existing signup. It is an operator-run bootstrap, not an exposed provisioning endpoint. A failed partial signup requires explicit review rather than automatic promotion on retry.
 
 No mail/storage/push provider or durable external scheduler is configured. CRON_SECRET alone does not schedule jobs; a reviewed active operations identity is required for schedule generation. No paid upgrade, public store publication, live payment integration or verified impact is claimed. Confirm Vercel plan eligibility for commercial operations and Neon retention/capacity before launch.
 

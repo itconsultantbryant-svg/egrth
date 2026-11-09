@@ -2,6 +2,8 @@
 
 ## Cloud connection stage — 9 November 2026
 
+- Owner-nominated first production administrator provisioned: Samson Bryant / `admin@ecogrowthlib.com`, PLATFORM_ADMIN for real non-demo EcoGrowth organization; bootstrap audit written. Hosted password login, expected membership in `/session` and authorized `/dashboard` returned success. Verification session sign-out returned 200. Password supplied via stdin, not written to source/env/docs. Email ownership/MFA were not falsely marked verified. Only platform identity records were added; no fictional customer/service/financial records were seeded.
+
 - Neon CLI created `egrth` project `noisy-art-52439847`, production main and schema-only preview in Frankfurt, PostgreSQL 17 / 0.25 CU. Applied all six production migrations; no remote demo seed.
 - Separate runtime passwords and auth/cron secrets configured in Vercel production/preview scopes. Runtime migration-ledger access revoked; migration credentials kept local.
 - First Vercel deployment served home but API failed from omitted workspace TypeScript. Added explicit esbuild Node bundle/adapter. Subsequent production health returned `status:ok`, `database:postgresql`, `demo:false`, `realtime:polling`. Initial protected request returned 500 with a schema-check error in logs; subsequent `/session` and `/sites` returned expected 401. Continue observing cold-start/schema validation; a successful retry does not erase the failure.
