@@ -4,6 +4,7 @@
 
 - Vercel project: `itconsultantbryant-svgs-projects/egrth`.
 - Production alias: https://egrth.vercel.app . Deployment status is not operational release approval.
+- Observed preview: https://egrth-5zu6we3on-itconsultantbryant-svgs-projects.vercel.app (Vercel deployment protection applies).
 - Neon project: `noisy-art-52439847` (`egrth`), organization `org-wandering-river-19284195`, AWS Frankfurt, PostgreSQL 17, fixed 0.25 CU.
 - Production branch: `main` / `br-aged-flower-b9elbv3b`.
 - Preview branch: `preview` / `br-odd-smoke-b9o724dr`, created schema-only, not a copy of operational data.
@@ -41,6 +42,10 @@ No mail/storage/push provider or durable external scheduler is configured. CRON_
 ## Verification and recovery
 
 Verify homepage, deep `/login`, `/api/v1/health`, unauthenticated protected reads, production empty-data status and authorized persistence before release. Verify preview separately. Health must report `demo:false`; no fictional seed is acceptable. Inspect Vercel logs for packaging/runtime failures. Record latest actual observations in `TEST-RESULTS.md` rather than treating READY as a working API.
+
+Latest observed production: homepage/login 200, browser login fields/public heading rendered, health 200 with demo false, unauthenticated session/sites 401. Preview health also passed using authenticated `vercel curl`; that CLI automatically created a project Automation Protection Bypass secret. It remains managed by Vercel and must be included in security review/revocation policy; it is not committed here. Authenticated bypass checks do not prove the preview URL is public.
+
+Preview was created schema-only: its migration-ledger rows were not copied. Do not blindly replay 0001 into its existing schema; establish a reviewed schema baseline/ledger before future preview migrations. Production has the full six-entry migration ledger. Automatic Git-to-Vercel deployment integration is not yet configured; source push and CLI deployments were performed separately.
 
 Neon project currently reports six-hour history retention; this is not an approved recovery policy. Local dump/restore tests do not verify cloud recovery. Define independent backup, retention, recovery access and observed cloud restore before onboarding real customers. Rotate credentials if any private env is exposed. Secrets must be re-entered through trusted local files/provider controls, never committed.
 

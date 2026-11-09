@@ -9,6 +9,8 @@
 - Typechecks passed. Latest unit/PostgreSQL run: **55 passed / 3 files**. API bundle/web build passed. Preview-origin/footer changes require latest deployed smoke checks.
 - Exact-value staged scan: **114 files**, no configured private database/auth/password/cron secret matches. Not a comprehensive security audit.
 - Updates remain five-second foreground polling, not push. Administrator provisioning, reset/mail/MFA and documented launch blockers remain open. Env handover: `DEPLOYMENT.md`; full PRD: `PRD.md`.
+- Latest production deployment `dpl_7Vgvba2PX9cGYP67f4bRcyx8Stt4`: sequential home/login 200, health 200/demo false, unauthenticated session/sites 401. Hosted Chrome verified rendered login controls and homepage heading. Preview `dpl_488dyZMmF37j9RQ2iuw7t7SgTWhn` health also passed through Vercel-authenticated protection bypass. CLI created a project automation bypass secret; see deployment security note. This does not claim preview public access or a production administrator workflow.
+- Full source published to `https://github.com/itconsultantbryant-svg/egrth.git`, `main`, initial commit `2566aee`. Private envs, artifacts and local database files excluded. GitHub Actions execution and automatic Git deployments are not yet observed/configured.
 
 Updated during execution; **unchecked or not-run is not a pass**.
 
