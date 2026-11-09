@@ -1,4 +1,5 @@
 import './styles.css';
+import './public-interactions';
 
 // The production homepage is React-rendered at build time and has only ordinary links.
 // It needs no auth/session cache, React runtime, or hydration to be readable and navigable.

@@ -13,6 +13,7 @@ import { command, commandSchemas } from './commands.js';
 import { attachmentRoutes } from './files.js';
 import { processOutbox } from './outbox.js';
 import { generateRollingJobs } from './scheduling.js';
+import { submitEnquiry, subscribeNewsletter, unsubscribeNewsletter } from './public-forms.js';
 export const app=new Hono<{Variables:{actor:Actor;correlationId:string}}>();
 app.use('*',secureHeaders());
 app.use('*',cors({origin:origin=>origins.includes(origin)?origin:undefined,credentials:true,allowHeaders:['Content-Type','Authorization','X-Membership-Id','Idempotency-Key'],allowMethods:['GET','POST','OPTIONS']}));
@@ -60,6 +61,9 @@ app.get('/api/v1/internal/schedule',async c=>{
  const actor=await actorFor(process.env.SCHEDULER_USER_ID,process.env.SCHEDULER_MEMBERSHIP_ID);
  return c.json(await db.transaction(tx=>generateRollingJobs(tx,actor)));
 });
+app.post('/api/v1/public/enquiries',submitEnquiry);
+app.post('/api/v1/public/newsletter',subscribeNewsletter);
+app.post('/api/v1/public/newsletter/unsubscribe',unsubscribeNewsletter);
 app.use('/api/v1/*',async(c,next)=>{
  const user=await resolveIdentity(c.req.raw.headers);if(!user)throw new ApiError(401,'UNAUTHENTICATED','Please sign in.');
  if(c.req.method==='POST'&&!c.req.header('authorization')?.startsWith('Bearer ')&&!origins.includes(c.req.header('origin')||''))throw new ApiError(403,'CSRF_ORIGIN','Cookie mutations require an allowed Origin.');
@@ -73,6 +77,18 @@ app.use('/api/v1/*',async(c,next)=>{
  await next();
 });
 app.post('/api/v1/logout',async c=>{const user=await resolveIdentity(c.req.raw.headers);await db.transaction(async tx=>{await tx.execute(sql`UPDATE native_credentials SET revoked=true WHERE user_id=${user!.id}`);await tx.execute(sql`DELETE FROM session WHERE "userId"=${user!.id} AND id NOT IN (SELECT session_id FROM native_credentials)`);await tx.execute(sql`UPDATE session SET "expiresAt"=now() WHERE "userId"=${user!.id}`);});return c.json({ok:true});});
+app.post('/api/v1/enquiries/:id/review',async c=>{
+ const a=c.get('actor');permit(a,'enquiries','write');
+ if(!a.global)throw new ApiError(403,'FORBIDDEN','Platform operations access required.');
+ const data=z.object({version:z.number().int().positive(),status:z.enum(['NEW','CONTACTED','CLOSED']),notes:z.string().trim().min(5).max(4000)}).parse(await c.req.json());
+ return c.json(await db.transaction(async tx=>{
+  const row=await object(tx,a,'enquiries',c.req.param('id'));
+  if(row.version!==data.version)throw new ApiError(409,'VERSION_CONFLICT','This enquiry changed. Refresh before saving.');
+  const result=(await tx.execute(sql`UPDATE enquiries SET status=${data.status},notes=${data.notes},version=version+1,updated_at=now() WHERE id=${row.id} RETURNING *`)).rows[0];
+  await tx.execute(sql`INSERT INTO audit_events(actor_id,organization_id,role,action,target_id,reason,changes) VALUES(${a.userId},${a.organizationId},${a.role},'enquiry-reviewed',${row.id},'Administrator recorded enquiry follow-up',${JSON.stringify({previousStatus:row.status,status:data.status,previousNotes:row.notes,notes:data.notes})}::jsonb)`);
+  return result;
+ }));
+});
 app.get('/api/v1/dashboard',async c=>{
  const a=c.get('actor');const metrics:Record<string,any>={};
  for(const r of ['sites','jobs','collections','manifests','receiving','invoices','payments','complaints'] as Resource[]){

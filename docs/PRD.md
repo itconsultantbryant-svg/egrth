@@ -178,3 +178,12 @@ Track scheduled service completion, missed/failed cases, capture-to-receiving la
 ## 12. Handover
 
 Source: requested `itconsultantbryant-svg/egrth` repository. Deployment settings and private env locations are documented in `DEPLOYMENT.md`; safe templates contain no real secrets. Preserve original branding. Production has no fictional operational seed. Signed app-store publication, paid purchases and service launch approval are separate decisions.
+
+## 13. Public website revision — 9 November 2026
+
+- Assessment must be accessible without login or signup and must not create an account automatically. Store consented contact/business/location/service details as a lead, return a reference and let authorized platform staff contact the requester.
+- Provide a separate public contact workflow with topic/contact preference, and an authorized enquiry inbox with status, private notes, concurrency checks and audit history. Do not expose leads to unrelated operational or customer roles.
+- Include Services and Team pages, contextual original African-led illustrations across information pages, three controlled homepage slides, customer-sector descriptions, FAQ, responsive public navigation and a standard multi-column footer.
+- Illustrative people/industries must not be described as actual customers, staff portraits or endorsements. No invented contact numbers, office locations, testimonials or partner agreements.
+- Newsletter requires separate optional consent, deduplication, private unsubscribe handling and admin-only consent visibility. No delivery/verification claim before a mailing provider and reviewed policy exist.
+- Acceptance covers anonymous submission, no accidental membership/site creation, durable abuse limits, safe retries, admin follow-up/audit, role denials, responsive layouts, carousel keyboard/pause/reduced-motion behavior and public-page accessibility. Implementation details and current limitations: `PUBLIC-WEBSITE.md`.

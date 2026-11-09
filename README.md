@@ -55,6 +55,8 @@ Cloud deployment was authorized: Neon production/preview branches and Vercel pro
 
 See [deployment/env handover](docs/DEPLOYMENT.md) and [full product requirements](docs/PRD.md). Private environment values are in ignored `.local/deployment/` files, never this repository.
 
+Public website: Services, Team, Contact and illustrated information pages, three-slide homepage, detailed footer and newsletter consent signup. **Assessment requests at `/quote-request` do not require an account.** Platform administrators/operations review these leads at `/app/enquiries`; newsletter records are administrator-only at `/app/newsletter`. Newsletter sending is not configured. See [public website workflow](docs/PUBLIC-WEBSITE.md).
+
 Scheduling policy and operator controls: `docs/SCHEDULING.md`. The production-preview check records explicit performance budgets separately from cache/security correctness:
 
 ```sh

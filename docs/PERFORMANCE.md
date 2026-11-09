@@ -30,3 +30,9 @@ After moving runtime startup off the static homepage, the latest constrained run
 The deployment/multi-run performance release gate remains **open**. Do not cherry-pick the best local run, equate static HTML with app-route interactivity, or promise deployment performance. Recheck on a controlled host and actual preview/staging deployment with observed compression, multiple cold runs and mobile hardware/network profiling.
 
 Functional cache tests are separate: only `/offline.html` is cached; protected API GET is not cached; offline navigation gives an honest unconfirmed/offline page; valid 192/512 icons exist; lazy `/login` renders without retaining prerendered homepage markup. Passing these checks is not a performance pass, signed mobile build or full PWA/device installation acceptance.
+
+## Illustrated website revision — 9 November 2026
+
+New three-slide gallery, original lightweight SVG scenes, newsletter/form interactions and public editorial layouts increase the bootstrap to ~7.04 kB / 3.02 kB gzip and shared CSS to ~56.03 kB / 12.57 kB gzip. Public home still does not request React/main, authenticated shell or charts. Static image dimensions and the gallery's fixed aspect/height reserve layout space; lower-page images use lazy loading.
+
+Latest revised local constrained run **failed the existing performance budgets**: visible-heading confirmation 13,220 ms, FCP 6,108 ms. Cache/security/lazy-login checks passed. Do not reuse the older 1,872 ms FCP pass as acceptance of this design. Host variability remains substantial; controlled repeated hosted/mobile profiling and further critical-path optimization remain open work. Offline test now explicitly takes both the independent CDP throttling session and Playwright context offline to avoid an online override invalidating the scenario.

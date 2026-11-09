@@ -16,7 +16,9 @@ export function source(resource:Resource,a:Actor){
  const org=a.organizationId,user=a.userId;
  const jobScope=a.role==='COLLECTOR'?sql`j.collector_id=${user}`:sql`(j.organization_id=${org} OR j.partner_organization_id=${org})`;
  const facilityScope=sql`f.organization_id=${org}`;
- const definitions:Record<Resource,{from:ReturnType<typeof sql>;scope:ReturnType<typeof sql>}>= {
+  const definitions:Record<Resource,{from:ReturnType<typeof sql>;scope:ReturnType<typeof sql>}>= {
+   enquiries:{from:sql`enquiries r`,scope:sql`false`},
+   newsletter:{from:sql`(SELECT id,email,status,consent_version,created_at,updated_at FROM newsletter_subscriptions) r`,scope:sql`false`},
   sites:{from:sql`sites r`,scope:sql`r.organization_id=${org}`},
   assessments:{from:sql`assessments r JOIN sites s ON s.id=r.site_id`,scope:sql`s.organization_id=${org}`},
   quotations:{from:sql`quotations r JOIN sites s ON s.id=r.site_id`,scope:sql`s.organization_id=${org}`},

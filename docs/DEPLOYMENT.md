@@ -47,10 +47,16 @@ Verify homepage, deep `/login`, `/api/v1/health`, unauthenticated protected read
 
 Latest observed production: homepage/login 200, browser login fields/public heading rendered, health 200 with demo false, unauthenticated session/sites 401. Preview health also passed using authenticated `vercel curl`; that CLI automatically created a project Automation Protection Bypass secret. It remains managed by Vercel and must be included in security review/revocation policy; it is not committed here. Authenticated bypass checks do not prove the preview URL is public.
 
-Preview was created schema-only: its migration-ledger rows were not copied. Do not blindly replay 0001 into its existing schema; establish a reviewed schema baseline/ledger before future preview migrations. Production has the full six-entry migration ledger. Automatic Git-to-Vercel deployment integration is not yet configured; source push and CLI deployments were performed separately.
+Preview was created schema-only. Before migration 0007, its original schema was compared with production (columns, constraints, indexes and triggers) and the six original checksummed migration metadata rows were baselined; no business data was copied. Migration 0007 then applied to both branches. `scripts/baseline-preview.ts` refuses an existing ledger or mismatched schema; it is not a general reset/rebaseline command. Automatic Git-to-Vercel deployment integration is not yet configured; source push and CLI deployments were performed separately.
 
 Neon project currently reports six-hour history retention; this is not an approved recovery policy. Local dump/restore tests do not verify cloud recovery. Define independent backup, retention, recovery access and observed cloud restore before onboarding real customers. Rotate credentials if any private env is exposed. Secrets must be re-entered through trusted local files/provider controls, never committed.
 
 ## PRD
 
 `docs/PRD.md` describes the full product, role scope, requirements, acceptance criteria, delivery phases, risks and release criteria. It intentionally separates shipped pilot behavior from unfinished release work.
+
+## Public website revision
+
+Redesign deployed to production as `dpl_5YkuYp3CLpt3VgkD5ytnffGgKaBM` at https://egrth.vercel.app . Hosted Chrome smoke checks passed for the home carousel, Services/Team/Contact/Assessment routes, decoded page illustrations and no-login assessment fields. Health returned 200/demo false; anonymous enquiry-inbox read returned 401. No test lead was inserted in production. Separate preview successfully persisted an explicitly labelled test request, which was then removed.
+
+Admin enquiries: `/app/enquiries`; newsletter records: `/app/newsletter`. Assessment requests do not require account creation. Newsletter and enquiry confirmation emails are not configured. See `PUBLIC-WEBSITE.md` for data/consent/update semantics and `PERFORMANCE.md` for the still-failing constrained local performance gate. All broader release blockers remain in force.

@@ -15,5 +15,5 @@ export type CollectionInput = z.infer<typeof collectionInput>;
 export type Membership = {id:string;organizationId:string;organizationName:string;role:Role};
 export type Session = {user:{id:string;name:string;email:string};memberships:Membership[];demo:boolean};
 export type Row = Record<string, any>;
-export type Resource = 'sites'|'assessments'|'quotations'|'subscriptions'|'schedules'|'jobs'|'routes'|'collections'|'manifests'|'receiving'|'reconciliation'|'residuals'|'invoices'|'payments'|'complaints'|'audit'|'notifications'|'batches'|'payables'|'containers'|'settings'|'users'|'reports';
-export const resources:Resource[]=['sites','assessments','quotations','subscriptions','schedules','jobs','routes','collections','manifests','receiving','reconciliation','residuals','invoices','payments','complaints','audit','notifications','batches','payables','containers','settings','users','reports'];
+export type Resource = 'enquiries'|'newsletter'|'sites'|'assessments'|'quotations'|'subscriptions'|'schedules'|'jobs'|'routes'|'collections'|'manifests'|'receiving'|'reconciliation'|'residuals'|'invoices'|'payments'|'complaints'|'audit'|'notifications'|'batches'|'payables'|'containers'|'settings'|'users'|'reports';
+export const resources:Resource[]=['enquiries','newsletter','sites','assessments','quotations','subscriptions','schedules','jobs','routes','collections','manifests','receiving','reconciliation','residuals','invoices','payments','complaints','audit','notifications','batches','payables','containers','settings','users','reports'];

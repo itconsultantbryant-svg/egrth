@@ -2,6 +2,14 @@
 
 This file tracks **implemented and observed**, not intended completion. No release is approved yet.
 
+## Public website revision
+- [x] Illustrated public redesign; three hero slides with manual/pause/reduced-motion controls; Services, Team, Contact and illustrated information pages; responsive navigation and detailed footer.
+- [x] No-login assessment/contact persistence, idempotent retries, validation/consent, durable submission limit and platform-only audited follow-up inbox.
+- [x] Separate newsletter consent records, admin-only list and private token unsubscribe; no automated mailing claim.
+- [x] Latest unit/PostgreSQL suite: 61 passed / 4 files. Separate full no-login-to-admin operational browser flow passed; focused public/calendar/admin regression run: 4 passed after accessibility fixes.
+- [ ] Newsletter mail provider, double opt-in verification and campaign/unsubscribe delivery workflow; approved operating privacy/retention policy.
+- [ ] Redesigned constrained performance gate: latest local run misses FCP/heading budgets; cache/offline safety passes. Do not infer release approval from deployment.
+
 ## A — foundation (in progress)
 - [x] Inspect repository: only supplied PNG, no application or existing instructions.
 - [x] Preserve supplied logo; forest/emerald shared tokens.

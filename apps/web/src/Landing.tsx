@@ -1,55 +1,19 @@
-import { Link } from 'react-router';
-import { ArrowRight, ArrowUpRight, CircleHelp, ClipboardCheck, FileCheck2, Leaf, MapPin, ShieldCheck, Sprout, Truck, Users } from 'lucide-react';
-
-const pages = ['how-it-works','accepted-materials','for-businesses','for-partners','service-areas','contact','privacy','terms'];
-const steps = [
-  { Icon: ClipboardCheck, number: '01', title: 'Start with your site', description: 'We assess your setup, agree a suitable service and help your team separate the right materials.' },
-  { Icon: Truck, number: '02', title: 'Keep collection dependable', description: 'Assigned routes, clear schedules and measured collection records support day-to-day operations.' },
-  { Icon: Sprout, number: '03', title: 'Know what happens next', description: 'Independent receiving, visible discrepancies and separate treatment records keep reporting grounded.' }
+import PublicLayout, { SiteCTA } from './PublicLayout';
+const slides=[
+ {image:'kitchen',alt:'Illustration of Black African kitchen staff separating food scraps',label:'01 / AT YOUR BUSINESS',title:'Good habits start in the kitchen.'},
+ {image:'collection',alt:'Illustration of a Black African collection crew beside a green service vehicle',label:'02 / ON THE ROAD',title:'A collection routine you can plan around.'},
+ {image:'receiving',alt:'Illustration of Black African receiving staff weighing a delivery independently',label:'03 / AT THE FACILITY',title:'Clear records at every handover.'}
 ];
-const Logo = () => <img className="logo" src="/logo.png" alt="EcoGrowth"/>;
-
-// This route deliberately imports no auth client, protected cache, forms, charts or domain ledger.
-export default function Landing({demo=import.meta.env?.VITE_DEMO_MODE!=='false'}:{demo?:boolean}={}) {
-  return <div className="public">
-    <header className="public-header">
-      <Link to="/" aria-label="EcoGrowth home"><Logo/></Link>
-      <nav aria-label="Public navigation"><Link to="/how-it-works">How it works</Link><Link to="/for-businesses">For businesses</Link><Link to="/service-areas">Service areas</Link></nav>
-      <Link className="button secondary" to="/login">Sign in <ArrowUpRight size={15}/></Link>
-    </header>
-    <main>
-      <section className="hero">
-        <div>
-          <span className="eyebrow"><span className="small-leaf"><Leaf size={14}/></span> A BETTER WAY TO HANDLE ORGANICS</span>
-          <h1>Less waste.<br/>More <span>possibility.</span></h1>
-          <p>Manage organic-waste collection for your business. View your schedule, track pickups and check invoices in one place.</p>
-          <div className="row wrap"><Link className="button primary large" to="/quote-request">Request a site assessment <ArrowUpRight size={18}/></Link><Link className="text-link" to="/how-it-works">See how it works <ArrowRight size={16}/></Link></div>
-          <div className="hero-foot"><ShieldCheck size={19}/><span>Clear service. Traceable records. Honest reporting.</span></div>
-        </div>
-        <div className="hero-visual">
-          <div className="orbit orbit-one"/><div className="orbit orbit-two"/>
-          <div className="plant-mark"><Sprout size={130} strokeWidth={1.2}/></div>
-          <div className="floating-card card-top"><span className="square-icon"><Truck size={21}/></span><div><strong>A dependable collection</strong><small>Assigned. Recorded. Accountable.</small></div><ShieldCheck size={18}/></div>
-          <div className="floating-card card-bottom"><span className="square-icon"><ShieldCheck size={22}/></span><div><strong>Evidence, not assumptions</strong><small>Pickup ≠ verified composting</small></div></div>
-          <span className="visual-label">ROOTED IN LIBERIA. BUILT TO GROW.</span>
-        </div>
-      </section>
-      <section className="principle-strip">
-        <div><MapPin size={20}/><span>Starting with a Sinkor pilot</span></div>
-        <div><Users size={20}/><span>Designed for food businesses</span></div>
-        <div><FileCheck2 size={20}/><span>Independent receiving records</span></div>
-      </section>
-      <section className="public-section">
-        <div className="section-heading"><div><span className="eyebrow">SIMPLE STEPS. RESPONSIBLE SERVICE.</span><h2>From separation to a clearer picture.</h2></div><Link className="text-link" to="/how-it-works">Explore the process <ArrowUpRight size={16}/></Link></div>
-        <div className="three-grid">{steps.map(({Icon,number,title,description})=><article className="process-card" key={number}><div className="row between"><span className="square-icon"><Icon size={24}/></span><span className="step-number">{number}</span></div><h3>{title}</h3><p>{description}</p></article>)}</div>
-      </section>
-      <section className="public-cta"><div><span className="eyebrow">BETTER HABITS START AT THE SOURCE</span><h2>Your food scraps deserve<br/>a more responsible next step.</h2><p>Organics recovery complements—not automatically replaces—your residual collection service.</p></div><Link className="button white" to="/accepted-materials">What goes in the container? <ArrowUpRight size={18}/></Link></section>
-      <aside className="demo-note"><CircleHelp size={18}/><span>{demo?<><strong>Demonstration environment.</strong> All businesses and providers shown are fictional.</>:<><strong>Service by agreement.</strong> Coverage, pricing and collection dates require confirmation. A pickup record does not confirm composting.</>}</span></aside>
-    </main>
-    <footer className="public-footer">
-      <div><Logo/><p>Organics, accounted for.</p><small>Monrovia, Liberia · Built for dependable operations.</small></div>
-      <nav aria-label="Footer">{pages.map(page=><Link key={page} to={'/'+page}>{page.replaceAll('-',' ')}</Link>)}</nav>
-      <small>© EcoGrowth. {demo?'Demonstration environment.':'Collection and receiving records.'}</small>
-    </footer>
-  </div>;
+const sectors=[['kitchen','Restaurants & cafés','From preparation scraps to coffee grounds. Build separation into your daily routine.'],['team','Hotels & hospitality','Coordinate kitchens, staff and collection windows around your guests.'],['market','Markets & food businesses','Plan for fresh-produce scraps and changing volumes at your site.']];
+export default function Landing({demo=import.meta.env?.VITE_DEMO_MODE!=='false'}:{demo?:boolean}={}){
+ return <PublicLayout>
+ <section className="site-hero site-container"><div className="hero-copy"><span className="site-kicker"><span className="kicker-line"/> ORGANICS. PEOPLE. POSSIBILITY.</span><h1>Less waste.<br/>More <em>possibility.</em></h1><p>Give your food scraps a more responsible next step. Practical separation support and planned organic-waste collection for Liberia’s food businesses.</p><div className="hero-actions"><a className="site-button" href="/quote-request">Request a site assessment ↗</a><a className="site-text-link" href="/services">Explore our services <span>→</span></a></div><div className="hero-assurance"><span aria-hidden="true">✓</span><p>No account needed.<br/><strong>We’ll start with your site, not a sales pitch.</strong></p></div></div>
+ <div className="hero-gallery" data-carousel role="region" aria-roledescription="carousel" aria-label="EcoGrowth service illustrations"><div className="hero-frames">{slides.map((slide,i)=><figure className={'hero-frame'+(i===0?' is-active':'')} data-slide key={slide.image} aria-hidden={i!==0}><img src={`/images/${slide.image}.svg`} width="1000" height="720" alt={slide.alt} fetchPriority={i===0?'high':'auto'}/><figcaption><span>{slide.label}</span><strong>{slide.title}</strong></figcaption></figure>)}</div><div className="carousel-toolbar"><div className="carousel-dots" role="group" aria-label="Choose a slide">{slides.map((slide,i)=><button key={slide.image} type="button" data-slide-to={i} aria-label={`Show slide ${i+1}: ${slide.title}`} aria-pressed={i===0}><span/></button>)}</div><span className="carousel-counter" data-slide-count>01 / 03</span><div><button type="button" data-carousel-pause aria-label="Pause slideshow">Ⅱ</button><button type="button" data-carousel-next aria-label="Next slide">→</button></div></div><div className="hero-stamp"><span>GROWING<br/>BETTER HABITS</span><span aria-hidden="true">✳</span><small>LIBERIA</small></div></div></section>
+ <div className="site-values"><div className="site-container"><span>Local understanding.</span><span>Practical separation.</span><span>Planned collections.</span><span>Clear receiving records.</span></div></div>
+ <section className="site-section site-container"><div className="site-section-heading"><div><span className="site-kicker">SMALL CHANGES. A BETTER ROUTINE.</span><h2>Good for your operations.<br/><em>Better for what comes next.</em></h2></div><p>We help you separate organics at the source, agree a workable service and keep track of each collection.</p></div><div className="service-cards">{[['01','Separate with confidence','Site assessments and practical guidance help your team know what belongs in the container.','/accepted-materials','↗'],['02','Make room for a routine','Agree collection frequency, storage and responsibilities before your service begins.','/services','↗'],['03','Follow each handover','Collection and facility receiving are recorded separately, so differences stay visible.','/how-it-works','↗']].map(([n,title,text,url,icon])=><a href={url} className="service-card" key={n}><div><span className="service-number">{n}</span><span className="service-icon" aria-hidden="true">{n==='01'?'♧':n==='02'?'↺':'☷'}</span></div><h3>{title}</h3><p>{text}</p><span className="service-card-link">Learn more {icon}</span></a>)}</div></section>
+ <section className="site-story"><div className="site-container story-grid"><figure><img src="/images/market.svg" width="1000" height="720" loading="lazy" alt="Original illustration of Black African market traders with fresh produce"/><figcaption>Local businesses. Shared responsibility.</figcaption></figure><div><span className="site-kicker">BUILT AROUND REAL WORKING DAYS</span><h2>From busy kitchens<br/>to <em>better habits.</em></h2><p>Food businesses have enough to manage. Your organics routine should be clear, workable and suited to the space you have.</p><ul className="site-checklist"><li>Review your site, storage and access.</li><li>Agree materials, prices and collection windows.</li><li>Help your team separate at the source.</li><li>Track service and raise questions when needed.</li></ul><a className="site-text-link" href="/how-it-works">See how it works →</a></div></div></section>
+ <section className="site-section site-container"><div className="site-section-heading"><div><span className="site-kicker">WHO WE’RE HERE FOR</span><h2>Different businesses.<br/><em>A shared next step.</em></h2></div><a className="site-text-link" href="/for-businesses">Find your fit →</a></div><div className="sector-cards">{sectors.map(([image,title,text])=><a href="/for-businesses" className="sector-card" key={title}><img src={`/images/${image}.svg`} width="1000" height="720" loading="lazy" alt={`Illustration representing ${title.toLowerCase()} with Black African people`}/><div><h3>{title} <span>↗</span></h3><p>{text}</p></div></a>)}</div><p className="site-caption">Business sectors shown are illustrative, not a list of current customers.</p></section>
+ <section className="site-container home-faq"><div><span className="site-kicker">A FEW THINGS WORTH KNOWING</span><h2>Before we get started.</h2></div><div>{[['Do I need an account to request an assessment?','No. Fill in the public assessment form. Our team can review your details and contact you about next steps.'],['Can you collect from my area?','Tell us your location and landmark. Coverage and collection availability must be confirmed after review; the website is not a promise of service.'],['Can all food waste go in the container?','No. Approved materials depend on the receiving facility and your agreed site guidance. Keep plastics, glass, chemicals and unapproved packaging out.'],['Does a pickup mean my waste has been composted?','No. Collection, independent receiving and treatment are separate stages. We do not assume treatment or carbon savings from a pickup.']].map(([q,a])=><details key={q}><summary>{q}<span aria-hidden="true">+</span></summary><p>{a}</p></details>)}</div></section>
+ <SiteCTA/>{demo&&<p className="site-demo-note">Local demonstration environment. Operational demo records are fictional.</p>}
+ </PublicLayout>;
 }

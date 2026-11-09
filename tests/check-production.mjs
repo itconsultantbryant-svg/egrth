@@ -27,7 +27,10 @@ try{
  await page.goto('http://localhost:4173/login');await page.getByRole('heading',{name:'Welcome back.',exact:true}).waitFor();
  assert.equal(await page.getByRole('heading',{name:/Less waste/}).count(),0,'Non-home SPA routes must not retain prerendered homepage markup');
  assert.deepEqual(errors,[],'Lazy application route must render without uncaught errors');
- await context.setOffline(true);await page.goto('http://localhost:4173/app/jobs');await page.getByRole('heading',{name:"You're offline"}).waitFor();
+  // The custom CDP throttling session must also be taken offline; context-only offline
+  // can otherwise leave that session's explicit online override active in Chrome.
+  await cdp.send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:0,uploadThroughput:0});
+  await context.setOffline(true);await page.goto('http://localhost:4173/app/jobs');await page.getByRole('heading',{name:"You're offline"}).waitFor();
  const performanceBudget={firstContentfulPaintMs:3000,visibleHeadingMs:5000};
  const performanceTargetMet=paints['first-contentful-paint']<=performanceBudget.firstContentfulPaintMs&&firstViewMs<=performanceBudget.visibleHeadingMs;
  console.log(JSON.stringify({functionalChecks:'PASS',performanceTargetMet,performanceBudget,firstViewMs,paints,conditions:'375x812, cold context/cache disabled, 150ms latency, 1.6Mbps download, 0.6Mbps upload, 4x CPU, local Vite production preview (no CDN compression guarantee)',measurement:'Navigation commit to visible-heading confirmation; paint timings from browser navigation start. Cache/security checks run after removing throttles.',publicChartRequested:chartRequested,authenticatedShellRequested:applicationRequested,reactRuntimeRequested,protectedStatus,cachePaths,offlineFallback:true,lazyLoginRoute:true,manifestIconSizes:icons},null,2));

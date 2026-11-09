@@ -32,7 +32,7 @@ export async function disposablePostgres() {
     const url = new URL(source);
     url.pathname = '/' + name;
     pool = new pg.Pool({ connectionString: url.toString(), max: 5, connectionTimeoutMillis: 10000 });
-    for (const migration of ['0001_pilot.sql', '0002_hardening.sql', '0003_auth_compatibility.sql', '0004_scheduling.sql', '0005_schedule_evidence.sql', '0006_membership_metadata.sql']) {
+    for (const migration of ['0001_pilot.sql', '0002_hardening.sql', '0003_auth_compatibility.sql', '0004_scheduling.sql', '0005_schedule_evidence.sql', '0006_membership_metadata.sql', '0007_public_enquiries.sql']) {
       await pool.query(await readFile(new URL('../../packages/db/migrations/' + migration, import.meta.url), 'utf8'));
     }
     await promisify(execFile)(process.execPath, ['node_modules/tsx/dist/cli.mjs', 'packages/db/src/seed.ts'], {

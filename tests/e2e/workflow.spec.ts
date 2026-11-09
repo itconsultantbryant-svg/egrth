@@ -83,8 +83,27 @@ test.describe('isolated end-to-end operational pilot', () => {
   }
 
   test('request → assess → accept → schedule → collect → independently receive → reconcile → invoice → confirm → resolve', async ({ browser }) => {
+    const visitorContext=await browser.newContext();contexts.push(visitorContext);
+    const visitor=await visitorContext.newPage();await visitor.goto(origin+'/quote-request');
+    await visitor.getByLabel('Your full name').fill('Anonymous assessment fixture');
+    await visitor.getByLabel('Email address',{exact:true}).fill('public-browser@example.test');
+    await visitor.getByLabel('Business / organization name',{exact:true}).fill('Public fixture kitchen');
+    await visitor.getByLabel('Site location & nearest landmark').fill('Isolated fictional landmark');
+    await visitor.getByLabel('What support do you need?').selectOption('Site assessment & collection');
+    await visitor.getByLabel('Tell us about your materials and current routine').fill('Automated isolated assessment request without an account.');
+    await visitor.getByRole('checkbox').filter({visible:true}).first().check();
+    await visitor.getByRole('button',{name:/Send assessment request/}).click();
+    await expect(visitor.locator('.public-enquiry-form [data-form-status]')).toContainText('Request saved');
     const customer = await login(browser, 'customer1');
     const operations = await login(browser, 'operations');
+    await section(operations,'enquiries');
+    const lead=(await fixture.pool.query("SELECT reference FROM enquiries WHERE email='public-browser@example.test'")).rows[0];
+    await operations.getByRole('button',{name:'Review '+lead.reference,exact:true}).click();
+    await expect(operations.getByRole('region',{name:'Enquiry details'})).toContainText('Isolated fictional landmark');
+    await operations.getByLabel('Follow-up status').selectOption('CONTACTED');
+    await operations.getByLabel('Private follow-up notes').fill('Isolated automated callback recorded.');
+    await operations.getByRole('button',{name:'Save follow-up',exact:true}).click();
+    await expect.poll(async()=>(await fixture.pool.query("SELECT status FROM enquiries WHERE reference=$1",[lead.reference])).rows[0].status).toBe('CONTACTED');
     const collector = await login(browser, 'collector');
     const receiver = await login(browser, 'receiver');
     const finance = await login(browser, 'finance');

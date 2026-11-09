@@ -1,12 +1,12 @@
 import type { Resource, Role } from '@ecogrowth/contracts';
 type Grant = {read:Resource[];write:Resource[]};
-const operations:Resource[]=['sites','assessments','quotations','subscriptions','schedules','jobs','routes','collections','manifests','receiving','reconciliation','residuals','complaints','reports','notifications'];
+const operations:Resource[]=['enquiries','sites','assessments','quotations','subscriptions','schedules','jobs','routes','collections','manifests','receiving','reconciliation','residuals','complaints','reports','notifications'];
 const finance:Resource[]=['invoices','payments','payables','reports','audit','notifications'];
 export const grants:Record<Role,Grant>={
- PLATFORM_ADMIN:{read:[...operations,...finance,'batches','containers','settings','users'],write:[...operations,...finance,'batches','containers','settings','users']},
+ PLATFORM_ADMIN:{read:[...operations,...finance,'newsletter','batches','containers','settings','users'],write:[...operations,...finance,'batches','containers','settings','users']},
  OPERATIONS_MANAGER:{read:operations,write:operations.filter(x=>!['collections','receiving'].includes(x))},
  FINANCE_OFFICER:{read:[...finance,'sites','subscriptions'],write:['invoices','payments','payables']},
- READ_ONLY_REVIEWER:{read:[...operations,...finance,'batches'],write:[]},
+ READ_ONLY_REVIEWER:{read:[...operations.filter(r=>r!=='enquiries'),...finance,'batches'],write:[]},
  CUSTOMER_OWNER:{read:['sites','quotations','subscriptions','schedules','jobs','collections','invoices','payments','complaints','reports','notifications','containers'],write:['sites','quotations','payments','complaints']},
  CUSTOMER_STAFF:{read:['sites','schedules','jobs','collections','complaints','notifications'],write:['complaints']},
  PARTNER_DISPATCHER:{read:['jobs','routes','collections','manifests','complaints','payables','notifications'],write:['jobs','routes','manifests','complaints']},
