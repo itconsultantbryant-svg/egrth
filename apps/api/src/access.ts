@@ -2,15 +2,15 @@ import { db, sql } from '@ecogrowth/db';
 import type { Resource, Role } from '@ecogrowth/contracts';
 import { can } from '@ecogrowth/domain';
 export class ApiError extends Error{constructor(public status:number,public code:string,message:string){super(message);}}
-export type Actor={userId:string;organizationId:string;membershipId:string;role:Role;global:boolean};
+export type Actor={userId:string;organizationId:string;membershipId:string;role:Role;global:boolean;deniedPermissions?:string[]};
 export async function actorFor(userId:string,membershipId:string|null):Promise<Actor>{
  if(!membershipId)throw new ApiError(400,'MEMBERSHIP_REQUIRED','Choose an organization membership.');
- const r=await db.execute(sql`SELECT m.*,o.kind FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.id::text=${membershipId} AND m.user_id=${userId} AND m.active AND o.active`);
+  const r=await db.execute(sql`SELECT m.*,o.kind FROM memberships m JOIN organizations o ON o.id=m.organization_id JOIN "user" u ON u.id=m.user_id WHERE m.id::text=${membershipId} AND m.user_id=${userId} AND m.active AND o.active AND NOT u.disabled`);
  const m=r.rows[0];if(!m)throw new ApiError(403,'FORBIDDEN','Membership is not active or does not belong to you.');
  const global=m.kind==='PLATFORM'&&['PLATFORM_ADMIN','OPERATIONS_MANAGER','FINANCE_OFFICER','READ_ONLY_REVIEWER'].includes(m.role as string);
- return {userId,organizationId:m.organization_id as string,membershipId,role:m.role as Role,global};
+  return {userId,organizationId:m.organization_id as string,membershipId,role:m.role as Role,global,deniedPermissions:m.denied_permissions as string[]};
 }
-export function permit(a:Actor,r:Resource,action:'read'|'write'){if(!can(a.role,r,action))throw new ApiError(403,'FORBIDDEN',`Your role cannot ${action} ${r}.`);}
+export function permit(a:Actor,r:Resource,action:'read'|'write'){if(!can(a.role,r,action,a.deniedPermissions))throw new ApiError(403,'FORBIDDEN',`Your assigned permissions do not allow ${action} ${r}.`);}
 // Every list, report, export and object lookup uses the same scope builder.
 export function source(resource:Resource,a:Actor){
  const org=a.organizationId,user=a.userId;

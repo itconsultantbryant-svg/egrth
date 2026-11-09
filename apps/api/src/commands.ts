@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { db, sql } from '@ecogrowth/db';
-import { collectionInput, receivingInput, siteInput, paymentInput, complaintInput, uuid, reason, localTime, weekdays, schedulingSchemas } from '@ecogrowth/contracts';
+import { collectionInput, receivingInput, siteInput, paymentInput, complaintInput, uuid, reason, localTime, weekdays, schedulingSchemas, type Resource } from '@ecogrowth/contracts';
 import { assertTransition } from '@ecogrowth/domain';
 import { ApiError, type Actor, object, permit, event } from './access.js';
 import { digest } from './auth.js';
@@ -30,8 +30,15 @@ export const commandSchemas={
  'read-notification':idInput
 };
 export type Command=keyof typeof commandSchemas;
+const commandPermission:Record<Command,Resource>={
+ 'request-site':'sites','assess-site':'assessments','create-quote':'quotations','accept-quote':'quotations','activate-site':'subscriptions',
+ 'generate-jobs':'schedules','revise-schedule':'schedules','pause-schedule':'schedules','resume-schedule':'schedules','add-service-holiday':'schedules','remove-service-holiday':'schedules','end-subscription':'subscriptions',
+ 'reschedule-job':'jobs','restore-cancelled-job':'jobs','assign-job':'jobs','transition-job':'jobs','collect':'collections','dispatch':'manifests','deliver':'manifests','receive':'receiving','reconcile':'reconciliation','complete-residual':'residuals','issue-invoice':'invoices','submit-payment':'payments','review-payment':'payments','open-complaint':'complaints','resolve-complaint':'complaints','read-notification':'notifications'
+};
 export async function command(a:Actor,name:string,raw:unknown,key:string|null,executor:Pick<typeof db,'transaction'>=db){
- if(!Object.hasOwn(commandSchemas,name))throw new ApiError(404,'NOT_FOUND','Unknown command.');
+  if(!Object.hasOwn(commandSchemas,name))throw new ApiError(404,'NOT_FOUND','Unknown command.');
+  // Revoked role permissions apply to retries as well as first execution, not just UI controls.
+  permit(a,commandPermission[name as Command],name==='read-notification'?'read':'write');
  if(!key||key.length<8||key.length>150)throw new ApiError(400,'IDEMPOTENCY_REQUIRED','Supply an 8–150 character Idempotency-Key.');
  const data=(commandSchemas[name as Command] as z.ZodType).parse(raw) as any;
  const hash=digest(JSON.stringify({name,data}));

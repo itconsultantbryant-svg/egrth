@@ -2,6 +2,15 @@
 
 This file tracks **implemented and observed**, not intended completion. No release is approved yet.
 
+## User administration
+- [x] Platform-admin web account creation with unique usernames, private temporary credentials, explicit organizations and role-compatible memberships.
+- [x] Per-membership View/Manage restrictions within built-in role ceilings; API enforcement and restricted navigation/cache refresh.
+- [x] Forced private password change, guarded membership edits, account disable/enable, administrator reset, audited changes and web/native session revocation.
+- [x] Expanded API/security suite: 68 tests / 5 files passed, including seven isolated account/role/credential lifecycle tests. Both client typechecks and API/web build passed.
+- [x] New administrator browser lifecycle acceptance passed: account creation → username login → required private password → live permission removal → account disable/sign-in redirect. Runs with real API and disposable PostgreSQL; not production fake-user seeding.
+- [ ] Native export/device acceptance and full hosted administrator workflow tracked separately. Hosted username/email form, health and anonymous admin-route denial smoke checks pass; cold-start/performance guarantees are not established.
+- [ ] Invitations/email verification/reset delivery, administrator MFA verification/enforcement and detailed device-session inventory remain unreleased.
+
 ## Public website revision
 - [x] Illustrated public redesign; three hero slides with manual/pause/reduced-motion controls; Services, Team, Contact and illustrated information pages; responsive navigation and detailed footer.
 - [x] No-login assessment/contact persistence, idempotent retries, validation/consent, durable submission limit and platform-only audited follow-up inbox.

@@ -33,6 +33,7 @@ test.describe('isolated end-to-end operational pilot', () => {
     await api?.stop();
     await fixture?.cleanup();
   });
+  test.afterEach(async()=>{await Promise.all(contexts.splice(0).map(context=>context.close()));});
 
   async function login(browser: Browser, identity: string) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
@@ -48,7 +49,7 @@ test.describe('isolated end-to-end operational pilot', () => {
     await page.getByLabel('Email address').fill(identity + '@demo.ecogrowth.test');
     await page.getByLabel('Password', { exact: true }).fill(process.env.DEMO_SEED_PASSWORD!);
     for(let attempt=0;attempt<4;attempt++){
-      const responsePromise=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/sign-in/email')&&response.request().method()==='POST');
+      const responsePromise=page.waitForResponse(response=>response.url().endsWith('/api/v1/auth/sign-in/identifier')&&response.request().method()==='POST');
       await page.getByRole('button', { name: 'Sign in', exact: true }).click();
       const response=await responsePromise;
       if(response.status()!==429){expect(response.status()).toBe(200);break;}
@@ -82,6 +83,38 @@ test.describe('isolated end-to-end operational pilot', () => {
     await expect(dialog).toBeHidden();
   }
 
+  test('administrator provisions a username, forces password change and updates live user permissions',async({browser})=>{
+    const admin=await login(browser,'admin');await section(admin,'users');
+    await admin.getByRole('button',{name:'Create user',exact:true}).click();
+    await admin.getByLabel('Full name',{exact:true}).fill('Browser staff fixture');
+    await admin.getByLabel('Email address',{exact:true}).fill('browser-staff@example.test');
+    await admin.getByLabel('Login username',{exact:true}).fill('browser.staff');
+    await admin.getByLabel('Temporary password',{exact:true}).fill('Browser-temporary-only-2026!');
+    const organization=(await fixture.pool.query("SELECT o.name FROM organizations o JOIN memberships m ON m.organization_id=o.id JOIN \"user\" u ON u.id=m.user_id WHERE u.email='customer1@demo.ecogrowth.test' LIMIT 1")).rows[0];
+    await admin.getByLabel('Organization',{exact:true}).selectOption({label:organization.name});
+    await admin.getByLabel('Reason for creating this account').fill('Isolated browser account provisioning test.');
+    await admin.getByRole('button',{name:'Create account and show credentials',exact:true}).click();
+    await expect(admin.getByRole('region',{name:'New account credentials'})).toContainText('browser.staff');
+    await admin.getByRole('button',{name:/I have shared the credentials securely/}).click();
+    const context=await browser.newContext();contexts.push(context);const staff=await context.newPage();
+    await staff.goto(origin+'/login');await staff.getByLabel('Email address or username',{exact:true}).fill('browser.staff');await staff.getByLabel('Password',{exact:true}).fill('Browser-temporary-only-2026!');await staff.getByRole('button',{name:'Sign in',exact:true}).click();
+    await expect(staff.getByRole('heading',{name:'Set your own password',exact:true})).toBeVisible();
+    await staff.getByLabel('Current temporary password',{exact:true}).fill('Browser-temporary-only-2026!');
+    await staff.getByLabel('New private password',{exact:true}).fill('Browser-private-only-2026!');await staff.getByLabel('Confirm new password',{exact:true}).fill('Browser-private-only-2026!');
+    await staff.getByRole('button',{name:'Save password and sign in again',exact:true}).click();await expect(staff.getByRole('heading',{name:'Welcome back.',exact:true})).toBeVisible();
+    await staff.getByLabel('Email address or username',{exact:true}).fill('browser.staff');await staff.getByLabel('Password',{exact:true}).fill('Browser-private-only-2026!');await staff.getByRole('button',{name:'Sign in',exact:true}).click();await expect(staff.getByRole('heading',{name:/A clearer view/})).toBeVisible();
+    await expect(staff.locator('aside.sidebar a[href="/app/users"]')).toHaveCount(0);
+    await section(staff,'complaints');
+    await admin.getByLabel('Search users by name, email or username').fill('browser.staff');
+    await admin.getByRole('button',{name:'Edit role & permissions',exact:true}).click();
+    await admin.locator('.permission-grid>div').filter({hasText:'Complaints'}).getByRole('checkbox',{name:'View',exact:true}).uncheck();
+    await admin.getByLabel('Reason for access change').fill('Remove complaint access during live browser session.');
+    await admin.getByRole('button',{name:'Save organization access',exact:true}).click();
+    await expect(staff.locator('aside.sidebar a[href="/app/complaints"]')).toHaveCount(0,{timeout:20000});
+    await expect(staff.getByRole('heading',{name:'Access not permitted',exact:true})).toBeVisible();
+    await admin.getByRole('button',{name:'Disable account',exact:true}).click();await admin.getByLabel('Reason',{exact:true}).fill('Disable owned browser fixture account.');await admin.getByRole('button',{name:'Confirm disable',exact:true}).click();
+    await expect(staff.getByRole('heading',{name:'Welcome back.',exact:true})).toBeVisible({timeout:20000});
+  });
   test('request → assess → accept → schedule → collect → independently receive → reconcile → invoice → confirm → resolve', async ({ browser }) => {
     const visitorContext=await browser.newContext();contexts.push(visitorContext);
     const visitor=await visitorContext.newPage();await visitor.goto(origin+'/quote-request');

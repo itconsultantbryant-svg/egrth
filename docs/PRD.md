@@ -187,3 +187,11 @@ Source: requested `itconsultantbryant-svg/egrth` repository. Deployment settings
 - Illustrative people/industries must not be described as actual customers, staff portraits or endorsements. No invented contact numbers, office locations, testimonials or partner agreements.
 - Newsletter requires separate optional consent, deduplication, private unsubscribe handling and admin-only consent visibility. No delivery/verification claim before a mailing provider and reviewed policy exist.
 - Acceptance covers anonymous submission, no accidental membership/site creation, durable abuse limits, safe retries, admin follow-up/audit, role denials, responsive layouts, carousel keyboard/pause/reduced-motion behavior and public-page accessibility. Implementation details and current limitations: `PUBLIC-WEBSITE.md`.
+
+## 14. Administrator-provisioned accounts
+
+Platform administrators must create named user accounts, give them unique usernames and temporary passwords, and assign organization-specific roles. They can restrict View/Manage functions within the role's maximum permissions; they cannot bypass tenant boundaries or independent receiving/finance duties with arbitrary grants. Explicit membership additions support legitimate multiple-organization work.
+
+Temporary passwords must be changed before accessing service data. Credential reset and account disabling revoke browser/native sessions; account/membership access must be checked on subsequent API requests. Users must be able to sign in by username or email and use assigned operational workflows, subject to site/assignment/state requirements. UI refresh uses explicit five-second authorized polling, not a false instant-push guarantee.
+
+Account creation, role/restriction changes, reset, disable and self-password changes must be audited without plaintext passwords. Enforce bounded forms, maintained password hashing, reason/version checks, transaction-safe creation/retry, proper role/organization compatibility and self/last-admin lockout protection. Existing accounts retain email login and are not silently reset by migration. Operator instructions, endpoint contract and remaining MFA/mail/device requirements: `USER-ADMINISTRATION.md`.

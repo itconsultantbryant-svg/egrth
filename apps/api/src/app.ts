@@ -14,6 +14,7 @@ import { attachmentRoutes } from './files.js';
 import { processOutbox } from './outbox.js';
 import { generateRollingJobs } from './scheduling.js';
 import { submitEnquiry, subscribeNewsletter, unsubscribeNewsletter } from './public-forms.js';
+import { userAdminRoutes, identifierSignIn, changeOwnPassword } from './user-administration.js';
 export const app=new Hono<{Variables:{actor:Actor;correlationId:string}}>();
 app.use('*',secureHeaders());
 app.use('*',cors({origin:origin=>origins.includes(origin)?origin:undefined,credentials:true,allowHeaders:['Content-Type','Authorization','X-Membership-Id','Idempotency-Key'],allowMethods:['GET','POST','OPTIONS']}));
@@ -48,11 +49,13 @@ app.post('/api/v1/auth/native/refresh',async c=>{
  if(!result)throw new ApiError(401,'REFRESH_REVOKED','Refresh revoked or expired. Sign in again.');return c.json(result);
 });
 app.post('/api/v1/auth/native/exchange',async c=>{const user=await resolveIdentity(c.req.raw.headers);if(!user)throw new ApiError(401,'UNAUTHENTICATED','Sign in first.');return c.json(await issueNative(user.id,user.session_id));});
+app.post('/api/v1/auth/sign-in/identifier',c=>identifierSignIn(c.req.raw));
+app.post('/api/v1/auth/credentials/change',async c=>c.json(await changeOwnPassword(c.req.raw)));
 app.on(['GET','POST'],'/api/v1/auth/*',c=>auth.handler(c.req.raw));
 app.get('/api/v1/session',async c=>{
  const user=await resolveIdentity(c.req.raw.headers);if(!user)throw new ApiError(401,'UNAUTHENTICATED','Please sign in.');
- const memberships=await db.execute(sql`SELECT m.id,m.organization_id AS "organizationId",m.role,o.name AS "organizationName" FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=${user.id} AND m.active AND o.active ORDER BY o.name,m.role`);
- return c.json({user:{id:user.id,name:user.name,email:user.email},memberships:memberships.rows,demo:process.env.DEMO_MODE==='true'});
+  const memberships=await db.execute(sql`SELECT m.id,m.organization_id AS "organizationId",m.role,m.denied_permissions AS "deniedPermissions",o.name AS "organizationName" FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=${user.id} AND m.active AND o.active ORDER BY o.name,m.role`);
+  return c.json({user:{id:user.id,name:user.name,email:user.email,username:user.login_username},memberships:memberships.rows,passwordChangeRequired:user.must_change_password,demo:process.env.DEMO_MODE==='true'});
 });
 app.get('/api/v1/internal/outbox',async c=>{if(!process.env.CRON_SECRET||c.req.header('authorization')!==`Bearer ${process.env.CRON_SECRET}`)throw new ApiError(401,'UNAUTHENTICATED','Scheduler authorization required.');return c.json(await processOutbox());});
 app.get('/api/v1/internal/schedule',async c=>{
@@ -65,7 +68,8 @@ app.post('/api/v1/public/enquiries',submitEnquiry);
 app.post('/api/v1/public/newsletter',subscribeNewsletter);
 app.post('/api/v1/public/newsletter/unsubscribe',unsubscribeNewsletter);
 app.use('/api/v1/*',async(c,next)=>{
- const user=await resolveIdentity(c.req.raw.headers);if(!user)throw new ApiError(401,'UNAUTHENTICATED','Please sign in.');
+  const user=await resolveIdentity(c.req.raw.headers);if(!user)throw new ApiError(401,'UNAUTHENTICATED','Please sign in.');
+  if(user.must_change_password&&c.req.path!=='/api/v1/logout')throw new ApiError(403,'PASSWORD_CHANGE_REQUIRED','Change your temporary password before using the workspace.');
  if(c.req.method==='POST'&&!c.req.header('authorization')?.startsWith('Bearer ')&&!origins.includes(c.req.header('origin')||''))throw new ApiError(403,'CSRF_ORIGIN','Cookie mutations require an allowed Origin.');
  c.set('actor',await actorFor(user.id,c.req.header('x-membership-id')||null));
  if(c.req.method==='POST'||c.req.query('format')==='csv'){
@@ -77,6 +81,7 @@ app.use('/api/v1/*',async(c,next)=>{
  await next();
 });
 app.post('/api/v1/logout',async c=>{const user=await resolveIdentity(c.req.raw.headers);await db.transaction(async tx=>{await tx.execute(sql`UPDATE native_credentials SET revoked=true WHERE user_id=${user!.id}`);await tx.execute(sql`DELETE FROM session WHERE "userId"=${user!.id} AND id NOT IN (SELECT session_id FROM native_credentials)`);await tx.execute(sql`UPDATE session SET "expiresAt"=now() WHERE "userId"=${user!.id}`);});return c.json({ok:true});});
+app.route('/api/v1/admin',userAdminRoutes);
 app.post('/api/v1/enquiries/:id/review',async c=>{
  const a=c.get('actor');permit(a,'enquiries','write');
  if(!a.global)throw new ApiError(403,'FORBIDDEN','Platform operations access required.');
@@ -92,7 +97,7 @@ app.post('/api/v1/enquiries/:id/review',async c=>{
 app.get('/api/v1/dashboard',async c=>{
  const a=c.get('actor');const metrics:Record<string,any>={};
  for(const r of ['sites','jobs','collections','manifests','receiving','invoices','payments','complaints'] as Resource[]){
-  if(!can(a.role,r,'read'))continue;const d=source(r,a);const rows=(await db.execute(sql`SELECT r.* FROM ${d.from} WHERE ${d.scope} ORDER BY r.created_at DESC LIMIT 1000`)).rows as any[];
+   if(!can(a.role,r,'read',a.deniedPermissions))continue;const d=source(r,a);const rows=(await db.execute(sql`SELECT r.* FROM ${d.from} WHERE ${d.scope} ORDER BY r.created_at DESC LIMIT 1000`)).rows as any[];
   if(r==='sites')metrics.sites={value:rows.filter(x=>x.status==='ACTIVE').length,unit:'sites',definition:'Active service sites; not necessarily paid',basis:'Current status'};
   if(r==='jobs'){for(const [k,states]of Object.entries({scheduled:['SCHEDULED','ASSIGNED','EN_ROUTE','ARRIVED'],completed:['COLLECTED','PARTIALLY_COLLECTED'],missed:['MISSED','FAILED']}))metrics[k]={value:rows.filter(x=>states.includes(x.state)).length,unit:'jobs',definition:states.join(', '),basis:'Occurrence records, all dates'};}
   if(r==='collections')metrics.collected={value:rows.reduce((n,x)=>n+Number(x.net_grams),0)/1000,unit:'kg',definition:'Pickup net mass, measured and estimated; not treatment',basis:'Collection occurrence; all available dates'};

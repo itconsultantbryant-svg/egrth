@@ -57,6 +57,8 @@ See [deployment/env handover](docs/DEPLOYMENT.md) and [full product requirements
 
 Public website: Services, Team, Contact and illustrated information pages, three-slide homepage, detailed footer and newsletter consent signup. **Assessment requests at `/quote-request` do not require an account.** Platform administrators/operations review these leads at `/app/enquiries`; newsletter records are administrator-only at `/app/newsletter`. Newsletter sending is not configured. See [public website workflow](docs/PUBLIC-WEBSITE.md).
 
+**Users & access:** platform administrators can create username/password accounts, assign organization roles and per-membership restrictions, reset temporary passwords and disable accounts. New credentials require a private password change before service access. See [administrator guide](docs/USER-ADMINISTRATION.md). Updates use authorized five-second polling; session/membership restrictions are checked on subsequent API requests, not trusted from the UI.
+
 Scheduling policy and operator controls: `docs/SCHEDULING.md`. The production-preview check records explicit performance budgets separately from cache/security correctness:
 
 ```sh

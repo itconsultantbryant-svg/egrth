@@ -14,7 +14,7 @@ export const grants:Record<Role,Grant>={
  FACILITY_MANAGER:{read:['manifests','receiving','reconciliation','batches','residuals','reports','notifications'],write:['receiving','reconciliation','batches','residuals']},
  RECEIVING_OFFICER:{read:['manifests','receiving','reconciliation','notifications'],write:['receiving']}
 };
-export const can=(role:Role,resource:Resource,action:'read'|'write')=>grants[role][action].includes(resource);
+export const can=(role:Role,resource:Resource,action:'read'|'write',deniedPermissions:readonly string[]=[])=>grants[role][action].includes(resource)&&!deniedPermissions.includes(resource+':'+action)&&!(action==='write'&&deniedPermissions.includes(resource+':read'));
 export const pickupEdges:Record<string,string[]>={REQUESTED:['UNDER_REVIEW','CANCELLED'],UNDER_REVIEW:['APPROVED','CANCELLED'],APPROVED:['SCHEDULED','CANCELLED'],SCHEDULED:['ASSIGNED','CANCELLED','RESCHEDULED'],ASSIGNED:['EN_ROUTE','MISSED','FAILED','RESCHEDULED'],EN_ROUTE:['ARRIVED','FAILED'],ARRIVED:['COLLECTED','PARTIALLY_COLLECTED','FAILED'],RESCHEDULED:['SCHEDULED']};
 export function assertTransition(from:string,to:string){if(!pickupEdges[from]?.includes(to))throw new Error(`Illegal pickup transition: ${from} → ${to}`);}
 export function economics(sites:number){if(!Number.isSafeInteger(sites)||sites<0)throw new Error('Invalid site count');const revenue=sites*4000;const directCost=Math.ceil(sites/30)*30000+sites*700;return {revenue,directCost,contribution:revenue-directCost,operatingResult:revenue-directCost-60000,currency:'USD',basis:'Illustrative monthly assumptions, subject to weight/frequency'};}

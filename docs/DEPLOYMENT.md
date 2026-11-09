@@ -60,3 +60,9 @@ Neon project currently reports six-hour history retention; this is not an approv
 Redesign deployed to production as `dpl_5YkuYp3CLpt3VgkD5ytnffGgKaBM` at https://egrth.vercel.app . Hosted Chrome smoke checks passed for the home carousel, Services/Team/Contact/Assessment routes, decoded page illustrations and no-login assessment fields. Health returned 200/demo false; anonymous enquiry-inbox read returned 401. No test lead was inserted in production. Separate preview successfully persisted an explicitly labelled test request, which was then removed.
 
 Admin enquiries: `/app/enquiries`; newsletter records: `/app/newsletter`. Assessment requests do not require account creation. Newsletter and enquiry confirmation emails are not configured. See `PUBLIC-WEBSITE.md` for data/consent/update semantics and `PERFORMANCE.md` for the still-failing constrained local performance gate. All broader release blockers remain in force.
+
+## User administration
+
+Migration 0008 is applied to both Neon branches. Existing accounts keep email/password login; optional usernames and temporary-password flags are only set when explicitly provisioning/resetting users. The new web Users & access screen is described in `USER-ADMINISTRATION.md`. No additional real account or password reset was performed for implementation tests; those run in disposable local databases.
+
+User-administration deployment: `dpl_281XVaACnFBrqMnqJe7uj9jmFPzb`, production alias unchanged. Existing owner-administrator signs in by email; create new usernames from **Users & access**. Hosted login rendering, health and anonymous admin-route denial were checked. Full privileged browser lifecycle was verified locally with isolated PostgreSQL, not by creating a fictional production user. First hosted browser health request timed out; subsequent direct check passed, so cold-start/performance acceptance remains open.

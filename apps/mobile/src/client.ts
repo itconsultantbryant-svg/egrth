@@ -21,7 +21,7 @@ export async function request(path:string,membership?:string,body?:unknown,key?:
  const data=await response.json();if(!response.ok)throw new RequestError(response.status,data.error?.code||'REQUEST_FAILED',data.error?.message||'Request failed');return data;
 }
 export async function signIn(email:string,password:string){
- const result=await authClient.signIn.email({email,password});if(result.error)throw new Error(result.error.message||'Could not sign in.');
+  const result=await authClient.$fetch('/sign-in/identifier',{method:'POST',body:{identifier:email,password}});if(result.error)throw new Error(result.error.message||'Could not sign in.');
  const cookie=await authClient.getCookie();const response=await fetch(apiURL+'/api/v1/auth/native/exchange',{method:'POST',credentials:'omit',headers:{Cookie:cookie||'','Content-Type':'application/json'}});if(!response.ok)throw new Error('Native session exchange failed.');await SecureStore.setItemAsync('ecogrowth.credentials',JSON.stringify(await response.json()));
 }
 export async function clearCredentials(){await SecureStore.deleteItemAsync('ecogrowth.credentials');await authClient.signOut().catch(()=>{});queryClient.clear();}

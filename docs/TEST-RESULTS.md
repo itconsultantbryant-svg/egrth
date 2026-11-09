@@ -1,5 +1,17 @@
 # Actual verification log
 
+## User-administration continuation
+
+- Migration 0008 applied locally and to Neon production/preview. It preserves existing passwords and email login; no real production account was created or reset by this migration.
+- Added guarded platform-admin APIs for atomic account/organization/membership creation, membership role/restriction edits, account state, password reset, username-or-email login and self-password change. Uses maintained Better Auth hashing, reason/version checks, audit without passwords, explicit role/organization compatibility and transaction-serialized administrator rechecks.
+- Temporary credentials cannot access business APIs until privately changed; self-change, reset and disable revoke web/native sessions. Membership permissions are reread by the API and checked before command replay. Web/native session polling clears protected caches when access changes.
+- First focused API suite: **7 passed** in disposable PostgreSQL. Expanded combined typechecks/test/build run: **68 passed / 5 files**, both client typechecks and API/web production build passed.
+- Initial browser attempt was blocked because the harness restart also stopped local PostgreSQL; restored the existing local cluster without resetting data. Next attempt found an exact username-label/help-text naming issue before account creation; added explicit field names/descriptions and reran. No browser pass is inferred from those failures.
+- Web management includes bounded searchable account lists, explicit role permission matrix, additional memberships, state/reset controls and ephemeral credential receipts. Native username login, forced password-change UI, restricted menu/job visibility and cache invalidation are implemented but require fresh exports/device acceptance.
+- Browser follow-up found the organization select also needed an explicit accessible label; fixed it and the username input's modern HTML pattern escaping. Subsequent isolated administrator browser lifecycle **passed**: real account creation/receipt, username login, required private password change and fresh login, customer-scoped navigation, permission removal reflected while signed in, then disable/session loss and sign-in redirect. This is not a production user-creation probe.
+- Production deployment `dpl_281XVaACnFBrqMnqJe7uj9jmFPzb` ready at https://egrth.vercel.app . Hosted Chrome confirmed the username/email login field. Initial browser-driven health request timed out under current conditions; subsequent direct health check returned 200/demo false. Anonymous admin/users and admin/options checks returned 401. No cold-start latency/SLA is inferred from the retry.
+- Existing full operational browser regression rerun after account/login/command-permission changes: **passed** independently (request, no-login enquiry review, quote acceptance, activation/schedule, collection/receiving/reconciliation, invoice/payment review and complaint resolution). Combined API suite remains **68 tests / 5 files** from its observed passing run; no single combined all-browser pass is implied.
+
 ## Public website revision — 9 November 2026
 
 - Added original illustrated public design, three controllable hero slides, Services/Team and illustrated public information pages, advanced contact and no-login assessment forms, multi-column footer and separate newsletter consent signup.
